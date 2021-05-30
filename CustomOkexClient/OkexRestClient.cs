@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Net.Http;
@@ -81,6 +82,13 @@ namespace CustomOkexClient
             request.Headers.Add("OK-ACCESS-SIGN", finalSignature);
         }
 
+        private async Task<HttpResponseMessage> SendGetRequestAsync(string url)
+        {
+            var request = new HttpRequestMessage(HttpMethod.Get, url);
+            SetUpSignatureHeader(request);
+            return await _httpClient.SendAsync(request);
+        }
+
         public async Task<WebCallResult<IEnumerable<DepositDetails>>> FundingGetDepositHistory(
             string currency = null,
             DepositState? state = null,
@@ -95,14 +103,18 @@ namespace CustomOkexClient
             if (after.HasValue) url.Append($"after={after.Value.ToUnixTimeMilliSeconds()}&");
             if (before.HasValue) url.Append($"after={before.Value.ToUnixTimeMilliSeconds()}&");
             url.Append($"limit={limit}");
-            
-            var request = new HttpRequestMessage(HttpMethod.Get, url.ToString());
-            SetUpSignatureHeader(request);
-            var response = await _httpClient.SendAsync(request);
+
+            var response = await SendGetRequestAsync(url.ToString());
             var json = await response.Content.ReadAsStringAsync();
             if (!response.IsSuccessStatusCode)
             {
-                throw new HttpRequestException($"Request failed:\nStatus Code:{response.StatusCode}\n{json}");
+                //throw new HttpRequestException($"Request failed:\nStatus Code:{response.StatusCode}\n{json}");
+                var errorResponse = JsonConvert.DeserializeObject<BaseResponse<DepositDetails>>(json);
+                return WebCallResult<IEnumerable<DepositDetails>>
+                    .CreateErrorResult(
+                        response.StatusCode, 
+                        response.Headers,
+                        new WebError(errorResponse.Code, errorResponse.Message));
             }
             
             var baseResponse =  JsonConvert.DeserializeObject<BaseResponse<DepositDetails>>(json);
@@ -110,7 +122,47 @@ namespace CustomOkexClient
                 response.StatusCode,
                 response.Headers,
                 baseResponse.Data,
-                new WebError(baseResponse.Code, baseResponse.Message, baseResponse.Data));
+                null);
+        }
+
+        public async Task<WebCallResult<IEnumerable<TradeInstrument>>> PublicDataGetInstruments(
+            InstrumentType type,
+            string underlyingForOption = null,
+            string instrumentId = null)
+        {
+            if (type == InstrumentType.OPTION && string.IsNullOrEmpty(underlyingForOption))
+            {
+                return WebCallResult<IEnumerable<TradeInstrument>>.CreateErrorResult(
+                    null,
+                    null,
+                    new ArgumentError("Underlying argument is required for OPTION trade."));
+            }
+
+            var url = new StringBuilder("api/v5/public/instruments?");
+
+            url.Append($"instType={type.ToString()}");
+            if (!string.IsNullOrEmpty(underlyingForOption)) url.Append($"&uly={underlyingForOption}");
+            if (!string.IsNullOrEmpty(instrumentId)) url.Append($"&instId={instrumentId}");
+
+            var response = await SendGetRequestAsync(url.ToString());
+            var json = await response.Content.ReadAsStringAsync();
+            
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorResponse = JsonConvert.DeserializeObject<BaseResponse<TradeInstrument>>(json);
+                return WebCallResult<IEnumerable<TradeInstrument>>
+                    .CreateErrorResult(
+                        response.StatusCode, 
+                        response.Headers,
+                        new WebError(errorResponse.Code, errorResponse.Message));
+            }
+            
+            var baseResponse =  JsonConvert.DeserializeObject<BaseResponse<TradeInstrument>>(json);
+            return new WebCallResult<IEnumerable<TradeInstrument>>(
+                response.StatusCode,
+                response.Headers,
+                baseResponse.Data,
+                null);
         }
     }
 }

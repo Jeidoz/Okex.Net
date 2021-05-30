@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
@@ -10,6 +11,7 @@ using CustomOkexClient.Objects;
 using CustomOkexClient.Objects.Config;
 using CustomOkexClient.RestObjects.Common;
 using CustomOkexClient.RestObjects.Responses.Funding;
+using CustomOkexClient.RestObjects.Responses.PublicData;
 using Newtonsoft.Json;
 
 namespace CustomOkexClient
@@ -18,9 +20,9 @@ namespace CustomOkexClient
     {
         private OkexRestClient _restClient;
 
-        public CustomOkexClient(OkexApiCredentials okexCredentials)
+        public CustomOkexClient(OkexApiCredentials okexCredentials, bool isDemo = false)
         {
-            _restClient = new OkexRestClient(okexCredentials);
+            _restClient = new OkexRestClient(okexCredentials, isDemo);
         }
 
         private void ThrowExceptionForFailedRequest(Error error, string methodName)
@@ -218,6 +220,28 @@ namespace CustomOkexClient
                     AssetName = r.Currency
                 })
                 .ToArray();
+        }
+
+        public IEnumerable<TradeInstrument> GetInstrumentsWithOpenContracts(
+            InstrumentType instrumentType,
+            string underlyingForOption = null,
+            string instrumentId = null)
+        {
+            return GetInstrumentsWithOpenContractsAsync(instrumentType, underlyingForOption, instrumentId).Result;
+        }
+
+        public async Task<IEnumerable<TradeInstrument>> GetInstrumentsWithOpenContractsAsync(
+            InstrumentType instrumentType,
+            string underlyingForOption = null,
+            string instrumentId = null)
+        {
+            var result = await _restClient.PublicDataGetInstruments(instrumentType, underlyingForOption, instrumentId);
+            if (!result.Success)
+            {
+                ThrowExceptionForFailedRequest(result.Error, nameof(GetInstrumentsWithOpenContractsAsync));
+            }
+
+            return result.Data;
         }
     }
 }
