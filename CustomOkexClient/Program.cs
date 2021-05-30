@@ -9,11 +9,11 @@ namespace CustomOkexClient
     {
         static void Main(string[] args)
         {
-            var appSettingsFilePath = Path.Combine(Directory.GetCurrentDirectory(), "appsettings.json");
+            var appSettingsFilePath = Path.Combine(Directory.GetCurrentDirectory(), "appsettings.demo.json");
             var appSettingsJson = File.ReadAllText(appSettingsFilePath);
             var appSettings = JsonConvert.DeserializeObject<AppSettings>(appSettingsJson);
             
-            var okexClient = new CustomOkexClient(appSettings.OkexApiCredentials);
+            var okexClient = new CustomOkexClient(appSettings.OkexApiCredentials, true);
             var deposits = okexClient.GetCexPendingDeposits();
             foreach (var deposit in deposits)
             {

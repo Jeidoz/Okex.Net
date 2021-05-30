@@ -11,6 +11,7 @@ using CustomOkexClient.Helpers;
 using CustomOkexClient.Objects.Config;
 using CustomOkexClient.RestObjects.Common;
 using CustomOkexClient.RestObjects.Responses.Funding;
+using CustomOkexClient.RestObjects.Responses.PublicData;
 using Newtonsoft.Json;
 
 namespace CustomOkexClient
@@ -19,12 +20,15 @@ namespace CustomOkexClient
     {
         private const string BaseOkexApiUrl = "https://www.okex.com/";
 
+        public bool IsDemoAccount { get; set; }
+
         private readonly OkexApiCredentials _apiCredentials;
         private readonly JsonSerializerSettings _serializerSettings;
         private readonly HttpClient _httpClient;
 
-        public OkexRestClient(OkexApiCredentials credentials)
+        public OkexRestClient(OkexApiCredentials credentials, bool isDemo = false)
         {
+            IsDemoAccount = isDemo;
             _apiCredentials = credentials;
             _serializerSettings = new JsonSerializerSettings
             {
@@ -44,6 +48,11 @@ namespace CustomOkexClient
             if (!string.IsNullOrEmpty(_apiCredentials.Passphrase))
             {
                 _httpClient.DefaultRequestHeaders.Add("OK-ACCESS-PASSPHRASE", _apiCredentials.Passphrase);
+            }
+
+            if (IsDemoAccount)
+            {
+                _httpClient.DefaultRequestHeaders.Add("X-SIMULATED-TRADING", "1");
             }
         }
 
