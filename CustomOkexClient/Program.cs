@@ -16,11 +16,13 @@ namespace CustomOkexClient
             var appSettings = JsonConvert.DeserializeObject<AppSettings>(appSettingsJson);
             
             var okexClient = new CustomOkexClient(appSettings.OkexApiCredentials, true);
-            var instruments = okexClient.GetInstrumentsWithOpenContracts(InstrumentType.FUTURES);
-            foreach (var tradeInstrument in instruments)
+            
+            Console.WriteLine("\tFutures Order Books");
+            var orderBooks = okexClient.GetFuturesUsdtOrderBooks();
+            foreach (var entry in orderBooks)
             {
-                Console.WriteLine(
-                    $"ID: {tradeInstrument.Id} — {tradeInstrument.SettlementAndMarginCurrency} — {tradeInstrument.ContractMul} — {tradeInstrument.Status.ToString()}");
+                Console.WriteLine($"\t{entry.Key}");
+                Console.WriteLine(entry.Value);
             }
         }
     }

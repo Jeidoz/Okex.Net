@@ -20,5 +20,7 @@ namespace CustomOkexClient
             InstrumentType instrumentType,
             string underlyingForOption = null,
             string instrumentId = null);
+        IDictionary<string, OrderBook> GetFuturesUsdtOrderBooks();
+        Task<IDictionary<string, OrderBook>> GetFuturesUsdtOrderBooksAsync();
     }
 }

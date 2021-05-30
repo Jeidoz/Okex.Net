@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Net.Http;
 using System.Security.Cryptography;
 using System.Text;
@@ -63,7 +64,7 @@ namespace CustomOkexClient
             // var timestamp = $"{now:yyyy-MM-dd}T{now:hh:mm:ss.fff}Z";
             var timestamp = (DateTime.UtcNow.ToUnixTimeMilliSeconds() / 1000.0m).ToString(CultureInfo.InvariantCulture);
             request.Headers.Add("OK-ACCESS-TIMESTAMP", timestamp);
-            
+
             var method = request.Method.Method.ToUpper();
             var url = '/' + request.RequestUri?.ToString().Trim('?');
             var unencryptedSignature = $"{timestamp}{method}{url}";
@@ -72,12 +73,12 @@ namespace CustomOkexClient
                 var body = await request.Content.ReadAsStringAsync();
                 unencryptedSignature += body;
             }
-            
+
             var signatureBytes = Encoding.UTF8.GetBytes(unencryptedSignature);
             var secretKeyBytes = Encoding.UTF8.GetBytes(_apiCredentials.ApiSecret);
             using var hmacSha256Encoder = new HMACSHA256(secretKeyBytes);
             var hmacSha256Signature = hmacSha256Encoder.ComputeHash(signatureBytes);
-            
+
             var finalSignature = Convert.ToBase64String(hmacSha256Signature);
             request.Headers.Add("OK-ACCESS-SIGN", finalSignature);
         }
@@ -89,7 +90,7 @@ namespace CustomOkexClient
             return await _httpClient.SendAsync(request);
         }
 
-        public async Task<WebCallResult<IEnumerable<DepositDetails>>> FundingGetDepositHistory(
+        public async Task<WebCallResult<IEnumerable<DepositDetails>>> Funding_GetDepositHistory(
             string currency = null,
             DepositState? state = null,
             DateTime? after = null,
@@ -112,12 +113,12 @@ namespace CustomOkexClient
                 var errorResponse = JsonConvert.DeserializeObject<BaseResponse<DepositDetails>>(json);
                 return WebCallResult<IEnumerable<DepositDetails>>
                     .CreateErrorResult(
-                        response.StatusCode, 
+                        response.StatusCode,
                         response.Headers,
                         new WebError(errorResponse.Code, errorResponse.Message));
             }
-            
-            var baseResponse =  JsonConvert.DeserializeObject<BaseResponse<DepositDetails>>(json);
+
+            var baseResponse = JsonConvert.DeserializeObject<BaseResponse<DepositDetails>>(json);
             return new WebCallResult<IEnumerable<DepositDetails>>(
                 response.StatusCode,
                 response.Headers,
@@ -125,7 +126,7 @@ namespace CustomOkexClient
                 null);
         }
 
-        public async Task<WebCallResult<IEnumerable<TradeInstrument>>> PublicDataGetInstruments(
+        public async Task<WebCallResult<IEnumerable<TradeInstrument>>> PublicData_GetInstruments(
             InstrumentType type,
             string underlyingForOption = null,
             string instrumentId = null)
@@ -146,22 +147,47 @@ namespace CustomOkexClient
 
             var response = await SendGetRequestAsync(url.ToString());
             var json = await response.Content.ReadAsStringAsync();
-            
+
             if (!response.IsSuccessStatusCode)
             {
                 var errorResponse = JsonConvert.DeserializeObject<BaseResponse<TradeInstrument>>(json);
                 return WebCallResult<IEnumerable<TradeInstrument>>
                     .CreateErrorResult(
-                        response.StatusCode, 
+                        response.StatusCode,
                         response.Headers,
                         new WebError(errorResponse.Code, errorResponse.Message));
             }
-            
-            var baseResponse =  JsonConvert.DeserializeObject<BaseResponse<TradeInstrument>>(json);
+
+            var baseResponse = JsonConvert.DeserializeObject<BaseResponse<TradeInstrument>>(json);
             return new WebCallResult<IEnumerable<TradeInstrument>>(
                 response.StatusCode,
                 response.Headers,
                 baseResponse.Data,
+                null);
+        }
+
+        public async Task<WebCallResult<OrderBook>> MarketData_GetFuturesOrderBook(string instrumentId)
+        {
+            var url = $"api/v5/market/books?instId={instrumentId}";
+
+            var response = await SendGetRequestAsync(url);
+            var json = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorResponse = JsonConvert.DeserializeObject<BaseResponse<OrderBook>>(json);
+                return WebCallResult<OrderBook>
+                    .CreateErrorResult(
+                        response.StatusCode,
+                        response.Headers,
+                        new WebError(errorResponse.Code, errorResponse.Message));
+            }
+
+            var baseResponse = JsonConvert.DeserializeObject<BaseResponse<OrderBook>>(json);
+            return new WebCallResult<OrderBook>(
+                response.StatusCode,
+                response.Headers,
+                baseResponse.Data.FirstOrDefault(),
                 null);
         }
     }

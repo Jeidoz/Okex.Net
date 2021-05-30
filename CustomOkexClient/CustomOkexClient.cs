@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using CryptoExchange.Net.ExchangeInterfaces;
 using CryptoExchange.Net.Objects;
@@ -205,7 +207,7 @@ namespace CustomOkexClient
         
         public async Task<IEnumerable<CexPendingDepositDetails>> GetCexPendingDepositsAsync()
         {
-            var result = await _restClient.FundingGetDepositHistory();
+            var result = await _restClient.Funding_GetDepositHistory();
             if (!result.Success)
             {
                 ThrowExceptionForFailedRequest(result.Error, nameof(GetCexPendingDepositsAsync));
@@ -235,13 +237,45 @@ namespace CustomOkexClient
             string underlyingForOption = null,
             string instrumentId = null)
         {
-            var result = await _restClient.PublicDataGetInstruments(instrumentType, underlyingForOption, instrumentId);
+            var result = await _restClient.PublicData_GetInstruments(instrumentType, underlyingForOption, instrumentId);
             if (!result.Success)
             {
                 ThrowExceptionForFailedRequest(result.Error, nameof(GetInstrumentsWithOpenContractsAsync));
             }
 
             return result.Data;
+        }
+
+        public IDictionary<string, OrderBook> GetFuturesUsdtOrderBooks()
+        {
+            return GetFuturesUsdtOrderBooksAsync().Result;
+        }
+
+        public async Task<IDictionary<string, OrderBook>> GetFuturesUsdtOrderBooksAsync()
+        {
+            var symbols = await _restClient.PublicData_GetInstruments(InstrumentType.FUTURES);
+            var usdtSymbols = symbols.Data
+                .Where(s => s.SettlementAndMarginCurrency.Equals("USDT", StringComparison.InvariantCultureIgnoreCase))
+                .Select(s => s.Id)
+                .ToArray();
+
+            int numProcs = Environment.ProcessorCount;
+            int concurrencyLevel = numProcs * 2;
+            var orderBooks = new ConcurrentDictionary<string, OrderBook>(concurrencyLevel, usdtSymbols.Length);
+            
+            Parallel.ForEach(usdtSymbols, symbol =>
+            {
+                var orderBook = _restClient.MarketData_GetFuturesOrderBook(symbol).Result;
+                if (orderBook.Success)
+                {
+                    orderBooks.TryAdd(symbol, orderBook.Data);
+                }
+            });
+
+            return orderBooks
+                .OrderBy(kvp => kvp.Key)
+                .ThenBy(kvp => kvp.Value)
+                .ToDictionary(kvp => kvp.Key, t=> t.Value);
         }
     }
 }
