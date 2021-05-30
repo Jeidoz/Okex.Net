@@ -8,11 +8,11 @@ namespace CustomOkexClient.Converters
     {
         public override bool CanRead => false;
         public override bool CanWrite => true;
-        public override bool CanConvert(Type type) => type == typeof(int);
+        public override bool CanConvert(Type type) => type == typeof(decimal);
 
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
-            int number = (int) value;
+            decimal number = (decimal) value;
             writer.WriteValue(number.ToString(CultureInfo.InvariantCulture));
         }
 
