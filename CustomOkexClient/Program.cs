@@ -1,6 +1,8 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using CustomOkexClient.Objects.Config;
+using CustomOkexClient.RestObjects.Common;
 using Newtonsoft.Json;
 
 namespace CustomOkexClient
@@ -14,10 +16,11 @@ namespace CustomOkexClient
             var appSettings = JsonConvert.DeserializeObject<AppSettings>(appSettingsJson);
             
             var okexClient = new CustomOkexClient(appSettings.OkexApiCredentials, true);
-            var deposits = okexClient.GetCexPendingDeposits();
-            foreach (var deposit in deposits)
+            var instruments = okexClient.GetInstrumentsWithOpenContracts(InstrumentType.FUTURES);
+            foreach (var tradeInstrument in instruments)
             {
-                Console.WriteLine($"{deposit.Tx}\t{deposit.AssetName}\t{deposit.Amount}");
+                Console.WriteLine(
+                    $"ID: {tradeInstrument.Id} — {tradeInstrument.SettlementAndMarginCurrency} — {tradeInstrument.ContractMul} — {tradeInstrument.Status.ToString()}");
             }
         }
     }

@@ -1,4 +1,5 @@
 ﻿using System;
+using CustomOkexClient.Converters;
 using CustomOkexClient.RestObjects.Common;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
@@ -59,14 +60,14 @@ namespace CustomOkexClient.RestObjects.Responses.PublicData
         /// Only applicable to FUTURES/SWAP/OPTION
         /// </summary>
         [JsonProperty("ctVal")]
-        public decimal ContractValue { get; set; }
+        public decimal? ContractValue { get; set; }
 
         /// <summary>
         /// Contract multiplier; 
         /// Only applicable to FUTURES/SWAP/OPTION
         /// </summary>
         [JsonProperty("ctMult")]
-        public decimal ContractMultiplier { get; set; }
+        public decimal? ContractMultiplier { get; set; }
 
         /// <summary>
         /// Contract value currency; 
@@ -93,16 +94,16 @@ namespace CustomOkexClient.RestObjects.Responses.PublicData
         /// Listing time, Unix timestamp format in milliseconds, e.g. 1597026383085
         /// </summary>
         [JsonProperty("listTime")]
-        [JsonConverter(typeof(UnixDateTimeConverter))]
-        public DateTime ListingTime { get; set; }
+        [JsonConverter(typeof(MicrosecondEpochConverter))]
+        public DateTime? ListingTime { get; set; }
 
         /// <summary>
         /// Expiry time, Unix timestamp format in milliseconds, e.g. 1597026383085; 
         /// Only applicable to FUTURES/OPTION
         /// </summary>
         [JsonProperty("expTime")]
-        [JsonConverter(typeof(UnixDateTimeConverter))]
-        public DateTime ExpiryTime { get; set; }
+        [JsonConverter(typeof(MicrosecondEpochConverter))]
+        public DateTime? ExpiryTime { get; set; }
 
         /// <summary>
         /// Leverage; 
@@ -135,7 +136,7 @@ namespace CustomOkexClient.RestObjects.Responses.PublicData
         /// </summary>
         [JsonProperty("ctType")] 
         [JsonConverter(typeof(StringEnumConverter))]
-        public ContractType ContractType { get; set; }
+        public ContractType? ContractType { get; set; }
 
         /// <summary>
         /// Alias;
@@ -143,7 +144,7 @@ namespace CustomOkexClient.RestObjects.Responses.PublicData
         /// </summary>
         [JsonProperty("alias")]
         [JsonConverter(typeof(StringEnumConverter))]
-        public FuturesAlias Alias { get; set; }
+        public FuturesAlias? Alias { get; set; }
 
         /// <summary>
         /// Instrument status
