@@ -1,21 +1,19 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
-using CustomOkexClient.Objects.Config;
-using CustomOkexClient.RestObjects.Common;
+using CustomCexWrapper.Objects.Config;
 using Newtonsoft.Json;
 
-namespace CustomOkexClient
+namespace CustomCexWrapper
 {
-    class Program
+    internal static class Program
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
-            var appSettingsFilePath = Path.Combine(Directory.GetCurrentDirectory(), "appsettings.demo.json");
+            var appSettingsFilePath = Path.Combine(Directory.GetCurrentDirectory(), "appsettings.json");
             var appSettingsJson = File.ReadAllText(appSettingsFilePath);
             var appSettings = JsonConvert.DeserializeObject<AppSettings>(appSettingsJson);
             
-            var okexClient = new CustomOkexClient(appSettings.OkexApiCredentials, true);
+            var okexClient = new CustomOkexClient(appSettings.OkexApiCredentials, false);
             
             Console.WriteLine("\tFutures Order Books");
             var orderBooks = okexClient.GetFuturesUsdtOrderBooks();

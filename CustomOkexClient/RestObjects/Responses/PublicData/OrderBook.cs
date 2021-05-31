@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using CustomOkexClient.Converters;
+using CustomCexWrapper.Converters;
 using Newtonsoft.Json;
 
-namespace CustomOkexClient.RestObjects.Responses.PublicData
+namespace CustomCexWrapper.RestObjects.Responses.PublicData
 {
     public class OrderBook
     {

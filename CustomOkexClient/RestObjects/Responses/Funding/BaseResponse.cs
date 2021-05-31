@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace CustomOkexClient.RestObjects.Responses.Funding
+namespace CustomCexWrapper.RestObjects.Responses.Funding
 {
     public class BaseResponse
     {

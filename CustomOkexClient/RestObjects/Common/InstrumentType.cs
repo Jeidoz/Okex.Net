@@ -1,5 +1,5 @@
 ﻿// ReSharper disable InconsistentNaming
-namespace CustomOkexClient.RestObjects.Common
+namespace CustomCexWrapper.RestObjects.Common
 {
     public enum InstrumentType : byte
     {

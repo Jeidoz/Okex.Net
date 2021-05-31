@@ -1,12 +1,11 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using CryptoExchange.Net.ExchangeInterfaces;
-using CustomOkexClient.Objects;
-using CustomOkexClient.RestObjects.Common;
-using CustomOkexClient.RestObjects.Responses.PublicData;
+using CustomCexWrapper.Objects;
+using CustomCexWrapper.RestObjects.Common;
+using CustomCexWrapper.RestObjects.Responses.PublicData;
 
-namespace CustomOkexClient
+namespace CustomCexWrapper
 {
     public interface ICustomOkexClient : IExchangeClient
     {

@@ -1,4 +1,4 @@
-﻿namespace CustomOkexClient.RestObjects.Common
+﻿namespace CustomCexWrapper.RestObjects.Common
 {
     public enum FuturesAlias : byte
     {

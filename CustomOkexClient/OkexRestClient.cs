@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -8,39 +7,29 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using CryptoExchange.Net.Objects;
-using CustomOkexClient.Converters;
-using CustomOkexClient.Helpers;
-using CustomOkexClient.Objects.Config;
-using CustomOkexClient.RestObjects.Common;
-using CustomOkexClient.RestObjects.Responses.Funding;
-using CustomOkexClient.RestObjects.Responses.PublicData;
+using CustomCexWrapper.Helpers;
+using CustomCexWrapper.Objects.Config;
+using CustomCexWrapper.RestObjects.Common;
+using CustomCexWrapper.RestObjects.Responses.Funding;
+using CustomCexWrapper.RestObjects.Responses.PublicData;
 using Newtonsoft.Json;
 
-namespace CustomOkexClient
+namespace CustomCexWrapper
 {
     public sealed class OkexRestClient
     {
         private const string BaseOkexApiUrl = "https://www.okex.com/";
 
-        public bool IsDemoAccount { get; set; }
+        private bool IsDemoAccount { get; set; }
 
         private readonly OkexApiCredentials _apiCredentials;
-        private readonly JsonSerializerSettings _serializerSettings;
         private readonly HttpClient _httpClient;
 
         public OkexRestClient(OkexApiCredentials credentials, bool isDemo = false)
         {
             IsDemoAccount = isDemo;
             _apiCredentials = credentials;
-            _serializerSettings = new JsonSerializerSettings
-            {
-                Converters =
-                {
-                    new FormatNumbersAsTextConverter()
-                }
-            };
-            _httpClient = new HttpClient();
-            _httpClient.BaseAddress = new Uri(BaseOkexApiUrl);
+            _httpClient = new HttpClient {BaseAddress = new Uri(BaseOkexApiUrl)};
             SetUpDefaultHeaders();
         }
 
@@ -60,15 +49,13 @@ namespace CustomOkexClient
 
         private async void SetUpSignatureHeader(HttpRequestMessage request)
         {
-            // var now = DateTime.UtcNow + TimeSpan.FromHours(3);
-            // var timestamp = $"{now:yyyy-MM-dd}T{now:hh:mm:ss.fff}Z";
             var timestamp = (DateTime.UtcNow.ToUnixTimeMilliSeconds() / 1000.0m).ToString(CultureInfo.InvariantCulture);
             request.Headers.Add("OK-ACCESS-TIMESTAMP", timestamp);
 
             var method = request.Method.Method.ToUpper();
             var url = '/' + request.RequestUri?.ToString().Trim('?');
             var unencryptedSignature = $"{timestamp}{method}{url}";
-            if (request.Content is not null)
+            if (request.Content != null)
             {
                 var body = await request.Content.ReadAsStringAsync();
                 unencryptedSignature += body;
@@ -76,9 +63,12 @@ namespace CustomOkexClient
 
             var signatureBytes = Encoding.UTF8.GetBytes(unencryptedSignature);
             var secretKeyBytes = Encoding.UTF8.GetBytes(_apiCredentials.ApiSecret);
-            using var hmacSha256Encoder = new HMACSHA256(secretKeyBytes);
-            var hmacSha256Signature = hmacSha256Encoder.ComputeHash(signatureBytes);
 
+            byte[] hmacSha256Signature;
+            using (var hmacSha256Encoder = new HMACSHA256(secretKeyBytes))
+            {
+                hmacSha256Signature = hmacSha256Encoder.ComputeHash(signatureBytes);
+            }
             var finalSignature = Convert.ToBase64String(hmacSha256Signature);
             request.Headers.Add("OK-ACCESS-SIGN", finalSignature);
         }

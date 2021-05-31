@@ -1,10 +1,10 @@
 ﻿using System;
-using CustomOkexClient.Converters;
-using CustomOkexClient.RestObjects.Common;
+using CustomCexWrapper.Converters;
+using CustomCexWrapper.RestObjects.Common;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
-namespace CustomOkexClient.RestObjects.Responses.PublicData
+namespace CustomCexWrapper.RestObjects.Responses.PublicData
 {
     public class TradeInstrument
     {

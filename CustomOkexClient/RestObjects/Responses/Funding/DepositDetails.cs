@@ -1,9 +1,9 @@
 ﻿using System;
-using CustomOkexClient.RestObjects.Common;
+using CustomCexWrapper.RestObjects.Common;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
-namespace CustomOkexClient.RestObjects.Responses.Funding
+namespace CustomCexWrapper.RestObjects.Responses.Funding
 {
     public class DepositDetails
     {

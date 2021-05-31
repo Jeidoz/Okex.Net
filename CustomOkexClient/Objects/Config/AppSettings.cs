@@ -1,4 +1,4 @@
-﻿namespace CustomOkexClient.Objects.Config
+﻿namespace CustomCexWrapper.Objects.Config
 {
     public sealed class AppSettings
     {

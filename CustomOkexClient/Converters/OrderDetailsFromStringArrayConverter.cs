@@ -1,9 +1,9 @@
 ﻿using System;
-using CustomOkexClient.RestObjects.Responses.PublicData;
+using CustomCexWrapper.RestObjects.Responses.PublicData;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace CustomOkexClient.Converters
+namespace CustomCexWrapper.Converters
 {
     public class OrderDetailsFromStringArrayConverter : JsonConverter
     {
@@ -12,7 +12,7 @@ namespace CustomOkexClient.Converters
             throw new NotImplementedException();
         }
 
-        public override OrderDetails ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
             var array = JArray.Load(reader);
             var obj = new OrderDetails();

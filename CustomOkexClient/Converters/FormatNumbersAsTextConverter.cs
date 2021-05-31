@@ -2,7 +2,7 @@
 using System.Globalization;
 using Newtonsoft.Json;
 
-namespace CustomOkexClient.Converters
+namespace CustomCexWrapper.Converters
 {
     internal sealed class FormatNumbersAsTextConverter : JsonConverter
     {

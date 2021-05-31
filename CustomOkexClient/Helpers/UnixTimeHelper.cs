@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace CustomOkexClient.Helpers
+namespace CustomCexWrapper.Helpers
 {
     public static class UnixTimeHelper
     {

@@ -1,4 +1,4 @@
-﻿namespace CustomOkexClient.Objects
+﻿namespace CustomCexWrapper.Objects
 {
     public class CexPendingDepositDetails
     {

@@ -2,7 +2,7 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
-namespace CustomOkexClient.Converters
+namespace CustomCexWrapper.Converters
 {
     public class MicrosecondEpochConverter : DateTimeConverterBase
     {

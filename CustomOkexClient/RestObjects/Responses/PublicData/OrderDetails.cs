@@ -1,7 +1,7 @@
-﻿using CustomOkexClient.Converters;
+﻿using CustomCexWrapper.Converters;
 using Newtonsoft.Json;
 
-namespace CustomOkexClient.RestObjects.Responses.PublicData
+namespace CustomCexWrapper.RestObjects.Responses.PublicData
 {
     [JsonConverter(typeof(OrderDetailsFromStringArrayConverter))]
     public class OrderDetails
