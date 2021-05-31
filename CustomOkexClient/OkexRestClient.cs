@@ -166,9 +166,9 @@ namespace CustomOkexClient
                 null);
         }
 
-        public async Task<WebCallResult<OrderBook>> MarketData_GetFuturesOrderBook(string instrumentId)
+        public async Task<WebCallResult<OrderBook>> MarketData_GetFuturesOrderBook(string instrumentId, int depth = 20)
         {
-            var url = $"api/v5/market/books?instId={instrumentId}";
+            var url = $"api/v5/market/books?instId={instrumentId}&sz={depth}";
 
             var response = await SendGetRequestAsync(url);
             var json = await response.Content.ReadAsStringAsync();
