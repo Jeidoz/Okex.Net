@@ -1,4 +1,5 @@
 ﻿using System.Runtime.Serialization;
+using CryptoExchange.Net.ExchangeInterfaces;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
@@ -6,7 +7,7 @@ namespace CustomCexWrapper.RestObjects.Common
 {
     [DataContract]
     [JsonConverter(typeof(StringEnumConverter))]
-    public enum OrderSide
+    public enum CustomOrderSide
     {
         [EnumMember(Value = "buy")]
         Buy,

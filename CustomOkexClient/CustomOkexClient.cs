@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using CryptoExchange.Net.ExchangeInterfaces;
 using CryptoExchange.Net.Objects;
+using CustomCexWrapper.Helpers;
 using CustomCexWrapper.Objects;
 using CustomCexWrapper.Objects.Config;
 using CustomCexWrapper.RestObjects.Common;
@@ -147,6 +148,7 @@ namespace CustomCexWrapper
             string underlyingForOption = null,
             string instrumentId = null)
         {
+            instrumentId.ValidateSymbol();
             var result = await _restClient.PublicData_GetInstruments(instrumentType, underlyingForOption, instrumentId);
             if (!result.Success)
             {
@@ -186,6 +188,38 @@ namespace CustomCexWrapper
                 .OrderBy(kvp => kvp.Key)
                 .ThenBy(kvp => kvp.Value)
                 .ToDictionary(kvp => kvp.Key, t=> t.Value);
+        }
+
+        public CustomFutureOrder FuturesPlaceOrderByMarket(string symbol, CustomOrderSide side, decimal quantity)
+        {
+            return FuturesPlaceOrderByMarketAsync(symbol, side, quantity).Result;
+        }
+
+        public async Task<CustomFutureOrder> FuturesPlaceOrderByMarketAsync(string symbol, CustomOrderSide side, decimal quantity)
+        {
+            symbol.ValidateSymbol();
+            var placeResponse = await _restClient.MarketData_Futures_PlaceOrderByMarket(symbol, side, quantity);
+            if (!placeResponse.Success)
+            {
+                ThrowExceptionForFailedRequest(placeResponse.Error, nameof(FuturesPlaceOrderByMarketAsync));
+            }
+
+            var orderDetailsResponse = await _restClient.MarketData_GetOrderDetails(symbol, placeResponse.Data.OrderId);
+            if (!orderDetailsResponse.Success)
+            {
+                ThrowExceptionForFailedRequest(orderDetailsResponse.Error, nameof(FuturesPlaceOrderByMarketAsync));
+            }
+
+            return new CustomFutureOrder
+            {
+                Price = orderDetailsResponse.Data.LastFilledPrice,
+                Status = orderDetailsResponse.Data.State.ToString(),
+                Symbol = orderDetailsResponse.Data.Symbol,
+                AvgPrice = orderDetailsResponse.Data.AverageFilledPrice,
+                CreatedTime = orderDetailsResponse.Data.CreationTime,
+                ExecutedQuantity = orderDetailsResponse.Data.ExecutedQuantity,
+                OrderId = long.Parse(orderDetailsResponse.Data.OrderId)
+            };
         }
     }
 }

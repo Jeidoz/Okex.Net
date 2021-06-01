@@ -21,5 +21,7 @@ namespace CustomCexWrapper
             string instrumentId = null);
         IDictionary<string, OrderBook> GetFuturesUsdtOrderBooks();
         Task<IDictionary<string, OrderBook>> GetFuturesUsdtOrderBooksAsync();
+        CustomFutureOrder FuturesPlaceOrderByMarket(string symbol, CustomOrderSide side, decimal quantity);
+        Task<CustomFutureOrder> FuturesPlaceOrderByMarketAsync(string symbol, CustomOrderSide side, decimal quantity);
     }
 }

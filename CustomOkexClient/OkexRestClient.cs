@@ -6,11 +6,14 @@ using System.Net.Http;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using CryptoExchange.Net.ExchangeInterfaces;
 using CryptoExchange.Net.Objects;
 using CustomCexWrapper.Helpers;
 using CustomCexWrapper.Objects.Config;
 using CustomCexWrapper.RestObjects.Common;
+using CustomCexWrapper.RestObjects.Requests.Market;
 using CustomCexWrapper.RestObjects.Responses.Funding;
+using CustomCexWrapper.RestObjects.Responses.Market;
 using CustomCexWrapper.RestObjects.Responses.PublicData;
 using Newtonsoft.Json;
 
@@ -175,6 +178,86 @@ namespace CustomCexWrapper
 
             var baseResponse = JsonConvert.DeserializeObject<BaseResponse<OrderBook>>(json);
             return new WebCallResult<OrderBook>(
+                response.StatusCode,
+                response.Headers,
+                baseResponse.Data.FirstOrDefault(),
+                null);
+        }
+
+        public async Task<WebCallResult<PlaceOrderResponse>> MarketData_Futures_PlaceOrderByMarket(string symbol, CustomOrderSide side, decimal quantity)
+        {
+            var url = $"api/v5/trade/order";
+
+            var placeOrderRequest = new PlaceOrderRequest
+            {
+                Symbol = symbol,
+                Side = side,
+                Quantity = quantity,
+                OrderType = OrderType.Market,
+                Mode = TradeMode.IsolatedMargin
+            };
+
+            var body = JsonConvert.SerializeObject(
+                placeOrderRequest, 
+                Formatting.None, 
+                new JsonSerializerSettings { 
+                NullValueHandling = NullValueHandling.Ignore,
+                });
+            var request = new HttpRequestMessage(HttpMethod.Post, url)
+            {
+                Content = new StringContent(body, Encoding.UTF8, "application/json")
+            };
+            SetUpSignatureHeader(request);
+            var response = await _httpClient.SendAsync(request);
+            var json = await response.Content.ReadAsStringAsync();
+            
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorResponse = JsonConvert.DeserializeObject<BaseResponse<PlaceOrderResponse>>(json);
+                return WebCallResult<PlaceOrderResponse>
+                    .CreateErrorResult(
+                        response.StatusCode,
+                        response.Headers,
+                        new WebError(errorResponse.Code, errorResponse.Message));
+            }
+
+            var baseResponse = JsonConvert.DeserializeObject<BaseResponse<PlaceOrderResponse>>(json);
+            var placeResult = baseResponse.Data.First();
+            if (placeResult.ExecutionResultCode != "0" || !string.IsNullOrEmpty(placeResult.ExecutionFailedMessage))
+            {
+                return WebCallResult<PlaceOrderResponse>
+                    .CreateErrorResult(
+                        response.StatusCode,
+                        response.Headers,
+                        new ServerError(int.Parse(placeResult.ExecutionResultCode), placeResult.ExecutionFailedMessage));
+            }
+            
+            return new WebCallResult<PlaceOrderResponse>(
+                response.StatusCode,
+                response.Headers,
+                baseResponse.Data.FirstOrDefault(),
+                null);
+        }
+
+        public async Task<WebCallResult<OrderDetailsResponse>> MarketData_GetOrderDetails(string symbol, string orderId)
+        {
+            var url = $"api/v5/trade/order?ordId={orderId}&instId={symbol}";
+
+            var response = await SendGetRequestAsync(url);
+            var json = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorResponse = JsonConvert.DeserializeObject<BaseResponse<OrderDetailsResponse>>(json);
+                return WebCallResult<OrderDetailsResponse>
+                    .CreateErrorResult(
+                        response.StatusCode,
+                        response.Headers,
+                        new WebError(errorResponse.Code, errorResponse.Message));
+            }
+
+            var baseResponse = JsonConvert.DeserializeObject<BaseResponse<OrderDetailsResponse>>(json);
+            return new WebCallResult<OrderDetailsResponse>(
                 response.StatusCode,
                 response.Headers,
                 baseResponse.Data.FirstOrDefault(),
