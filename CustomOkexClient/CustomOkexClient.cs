@@ -16,31 +16,13 @@ namespace CustomCexWrapper
 {
     public class CustomOkexClient : ICustomOkexClient
     {
-        private OkexRestClient _restClient;
+        private readonly OkexRestClient _restClient;
 
         public CustomOkexClient(OkexApiCredentials okexCredentials, bool isDemo = false)
         {
             _restClient = new OkexRestClient(okexCredentials, isDemo);
         }
 
-        private void ThrowExceptionForFailedRequest(Error error, string methodName)
-        {
-            var errorDecription = $"Request {methodName} failed.\n";
-            if (error != null)
-            {
-                if (error.Code  != null)
-                {
-                    errorDecription += $"Error Code: {error.Code}\n";
-                }
-
-                if (string.IsNullOrEmpty(error.Message))
-                {
-                    errorDecription += $"Error Message: {error.Message}\n";
-                }
-            }
-            throw new HttpRequestException(errorDecription);
-        }
-        
         public string GetSymbolName(string baseAsset, string quoteAsset)
         {
             throw new NotImplementedException();
@@ -115,7 +97,7 @@ namespace CustomCexWrapper
         {
             return GetCexPendingDepositsAsync().Result;
         }
-        
+
         public async Task<IEnumerable<CexPendingDepositDetails>> GetCexPendingDepositsAsync()
         {
             var result = await _restClient.Funding_GetDepositHistory();
@@ -123,7 +105,7 @@ namespace CustomCexWrapper
             {
                 ThrowExceptionForFailedRequest(result.Error, nameof(GetCexPendingDepositsAsync));
             }
-            
+
             return result.Data
                 .Where(r => r.State != DepositState.DepositSuccessful)
                 .Select(r => new CexPendingDepositDetails
@@ -171,10 +153,10 @@ namespace CustomCexWrapper
                 .Select(s => s.Id)
                 .ToArray();
 
-            int numProcs = Environment.ProcessorCount;
-            int concurrencyLevel = numProcs * 2;
+            var numProcs = Environment.ProcessorCount;
+            var concurrencyLevel = numProcs * 2;
             var orderBooks = new ConcurrentDictionary<string, OrderBook>(concurrencyLevel, usdtSymbols.Length);
-            
+
             Parallel.ForEach(usdtSymbols, symbol =>
             {
                 var orderBook = _restClient.MarketData_GetFuturesOrderBook(symbol).Result;
@@ -187,7 +169,7 @@ namespace CustomCexWrapper
             return orderBooks
                 .OrderBy(kvp => kvp.Key)
                 .ThenBy(kvp => kvp.Value)
-                .ToDictionary(kvp => kvp.Key, t=> t.Value);
+                .ToDictionary(kvp => kvp.Key, t => t.Value);
         }
 
         public CustomFutureOrder FuturesPlaceOrderByMarket(string symbol, CustomOrderSide side, decimal quantity)
@@ -220,6 +202,24 @@ namespace CustomCexWrapper
                 ExecutedQuantity = orderDetailsResponse.Data.ExecutedQuantity,
                 OrderId = long.Parse(orderDetailsResponse.Data.OrderId)
             };
+        }
+
+        private void ThrowExceptionForFailedRequest(Error error, string methodName)
+        {
+            var errorDecription = $"Request {methodName} failed.\n";
+            if (error != null)
+            {
+                if (error.Code != null)
+                {
+                    errorDecription += $"Error Code: {error.Code}\n";
+                }
+
+                if (string.IsNullOrEmpty(error.Message))
+                {
+                    errorDecription += $"Error Message: {error.Message}\n";
+                }
+            }
+            throw new HttpRequestException(errorDecription);
         }
     }
 }

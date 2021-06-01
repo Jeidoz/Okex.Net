@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Globalization;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -9,7 +8,7 @@ namespace CustomCexWrapper.Converters
     {
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
-            var jt = JValue.ReadFrom(reader);
+            var jt = JToken.ReadFrom(reader);
 
             return jt.Value<decimal>();
         }

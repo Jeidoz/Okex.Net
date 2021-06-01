@@ -10,7 +10,7 @@ namespace CustomCexWrapper.RestObjects.Responses.PublicData
         public int PriceSize { get; set; }
         public int LiquidatedOrdersAmount { get; set; }
         public int OrdersAmount { get; set; }
-        
+
         public override string ToString()
         {
             return $"{DepthPrice} - {PriceSize} - {LiquidatedOrdersAmount} - {OrdersAmount}";

@@ -6,7 +6,6 @@ using System.Net.Http;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
-using CryptoExchange.Net.ExchangeInterfaces;
 using CryptoExchange.Net.Objects;
 using CustomCexWrapper.Helpers;
 using CustomCexWrapper.Objects.Config;
@@ -23,8 +22,6 @@ namespace CustomCexWrapper
     {
         private const string BaseOkexApiUrl = "https://www.okex.com/";
 
-        private bool IsDemoAccount { get; set; }
-
         private readonly OkexApiCredentials _apiCredentials;
         private readonly HttpClient _httpClient;
 
@@ -35,6 +32,8 @@ namespace CustomCexWrapper
             _httpClient = new HttpClient {BaseAddress = new Uri(BaseOkexApiUrl)};
             SetUpDefaultHeaders();
         }
+
+        private bool IsDemoAccount { get; }
 
         private void SetUpDefaultHeaders()
         {
@@ -92,10 +91,22 @@ namespace CustomCexWrapper
         {
             var url = new StringBuilder("api/v5/asset/deposit-history?");
 
-            if (!string.IsNullOrEmpty(currency)) url.Append($"ccy={currency}&");
-            if (state.HasValue) url.Append($"state={(int) state.Value}&");
-            if (after.HasValue) url.Append($"after={after.Value.ToUnixTimeMilliSeconds()}&");
-            if (before.HasValue) url.Append($"after={before.Value.ToUnixTimeMilliSeconds()}&");
+            if (!string.IsNullOrEmpty(currency))
+            {
+                url.Append($"ccy={currency}&");
+            }
+            if (state.HasValue)
+            {
+                url.Append($"state={(int)state.Value}&");
+            }
+            if (after.HasValue)
+            {
+                url.Append($"after={after.Value.ToUnixTimeMilliSeconds()}&");
+            }
+            if (before.HasValue)
+            {
+                url.Append($"after={before.Value.ToUnixTimeMilliSeconds()}&");
+            }
             url.Append($"limit={limit}");
 
             var response = await SendGetRequestAsync(url.ToString());
@@ -135,8 +146,14 @@ namespace CustomCexWrapper
             var url = new StringBuilder("api/v5/public/instruments?");
 
             url.Append($"instType={type.ToValidApiValue()}");
-            if (!string.IsNullOrEmpty(underlyingForOption)) url.Append($"&uly={underlyingForOption}");
-            if (!string.IsNullOrEmpty(instrumentId)) url.Append($"&instId={instrumentId}");
+            if (!string.IsNullOrEmpty(underlyingForOption))
+            {
+                url.Append($"&uly={underlyingForOption}");
+            }
+            if (!string.IsNullOrEmpty(instrumentId))
+            {
+                url.Append($"&instId={instrumentId}");
+            }
 
             var response = await SendGetRequestAsync(url.ToString());
             var json = await response.Content.ReadAsStringAsync();
@@ -186,7 +203,7 @@ namespace CustomCexWrapper
 
         public async Task<WebCallResult<PlaceOrderResponse>> MarketData_Futures_PlaceOrderByMarket(string symbol, CustomOrderSide side, decimal quantity)
         {
-            var url = $"api/v5/trade/order";
+            var url = "api/v5/trade/order";
 
             var placeOrderRequest = new PlaceOrderRequest
             {
@@ -198,10 +215,11 @@ namespace CustomCexWrapper
             };
 
             var body = JsonConvert.SerializeObject(
-                placeOrderRequest, 
-                Formatting.None, 
-                new JsonSerializerSettings { 
-                NullValueHandling = NullValueHandling.Ignore,
+                placeOrderRequest,
+                Formatting.None,
+                new JsonSerializerSettings
+                {
+                    NullValueHandling = NullValueHandling.Ignore
                 });
             var request = new HttpRequestMessage(HttpMethod.Post, url)
             {
@@ -210,7 +228,7 @@ namespace CustomCexWrapper
             SetUpSignatureHeader(request);
             var response = await _httpClient.SendAsync(request);
             var json = await response.Content.ReadAsStringAsync();
-            
+
             if (!response.IsSuccessStatusCode)
             {
                 var errorResponse = JsonConvert.DeserializeObject<BaseResponse<PlaceOrderResponse>>(json);
@@ -231,7 +249,7 @@ namespace CustomCexWrapper
                         response.Headers,
                         new ServerError(int.Parse(placeResult.ExecutionResultCode), placeResult.ExecutionFailedMessage));
             }
-            
+
             return new WebCallResult<PlaceOrderResponse>(
                 response.StatusCode,
                 response.Headers,

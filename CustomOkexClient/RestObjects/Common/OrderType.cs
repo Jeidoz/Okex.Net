@@ -10,15 +10,15 @@ namespace CustomCexWrapper.RestObjects.Common
     {
         [EnumMember(Value = "market")]
         Market,
-        [EnumMember(Value = "limit")] 
+        [EnumMember(Value = "limit")]
         Limit,
-        [EnumMember(Value = "post_only")] 
+        [EnumMember(Value = "post_only")]
         PostOnly,
-        [EnumMember(Value = "fok")] 
+        [EnumMember(Value = "fok")]
         FillOrKill,
-        [EnumMember(Value = "ioc")] 
+        [EnumMember(Value = "ioc")]
         ImmediateOrCancel,
-        [EnumMember(Value = "optimal_limit_ioc")] 
+        [EnumMember(Value = "optimal_limit_ioc")]
         MarketOrderWithImmediateOrCancel
     }
 }

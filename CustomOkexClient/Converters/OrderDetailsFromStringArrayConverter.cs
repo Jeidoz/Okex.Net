@@ -16,8 +16,7 @@ namespace CustomCexWrapper.Converters
         {
             var array = JArray.Load(reader);
             var obj = new OrderDetails();
-            for (int i = 0; i < array.Count; i++)
-            {
+            for (var i = 0; i < array.Count; i++)
                 if (array[i].Type == JTokenType.String)
                 {
                     if (i % 4 == 0)
@@ -37,7 +36,6 @@ namespace CustomCexWrapper.Converters
                         obj.OrdersAmount = int.Parse(array[i].Value<string>());
                     }
                 }
-            }
 
             return obj;
         }

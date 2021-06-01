@@ -1,5 +1,4 @@
 ﻿using System.Runtime.Serialization;
-using CryptoExchange.Net.ExchangeInterfaces;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 

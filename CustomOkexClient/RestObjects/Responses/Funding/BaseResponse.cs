@@ -9,7 +9,7 @@ namespace CustomCexWrapper.RestObjects.Responses.Funding
 
         [JsonProperty("msg")]
         public string Message { get; set; }
-        
+
         [JsonIgnore]
         public bool IsSuccessStatusCode => Code == 0;
     }
