@@ -94,7 +94,7 @@ namespace CustomCexWrapper.RestObjects.Responses.PublicData
         /// Listing time, Unix timestamp format in milliseconds, e.g. 1597026383085
         /// </summary>
         [JsonProperty("listTime")]
-        [JsonConverter(typeof(MicrosecondEpochConverter))]
+        [JsonConverter(typeof(UnixMillisecondsDateTimeConverter))]
         public DateTime? ListingTime { get; set; }
 
         /// <summary>
@@ -102,7 +102,7 @@ namespace CustomCexWrapper.RestObjects.Responses.PublicData
         /// Only applicable to FUTURES/OPTION
         /// </summary>
         [JsonProperty("expTime")]
-        [JsonConverter(typeof(MicrosecondEpochConverter))]
+        [JsonConverter(typeof(UnixMillisecondsDateTimeConverter))]
         public DateTime? ExpiryTime { get; set; }
 
         /// <summary>

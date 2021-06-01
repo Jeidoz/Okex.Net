@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using CustomCexWrapper.Converters;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace CustomCexWrapper.RestObjects.Responses.PublicData
 {
@@ -24,8 +25,8 @@ namespace CustomCexWrapper.RestObjects.Responses.PublicData
         /// Order book generation time
         /// </summary>
         [JsonProperty("ts")]
-        [JsonConverter(typeof(MicrosecondEpochConverter))]
-        public DateTime GenerationTime { get; set; }
+        [JsonConverter(typeof(UnixMillisecondsDateTimeConverter))]
+        public DateTime? GenerationTime { get; set; }
 
         public override string ToString()
         {

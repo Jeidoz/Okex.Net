@@ -4,7 +4,7 @@ using Newtonsoft.Json.Converters;
 
 namespace CustomCexWrapper.Converters
 {
-    public class MicrosecondEpochConverter : DateTimeConverterBase
+    public class UnixMillisecondsDateTimeConverter : DateTimeConverterBase
     {
         private static readonly DateTime Epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
@@ -15,7 +15,7 @@ namespace CustomCexWrapper.Converters
 
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
-            var t = long.Parse((string)reader.Value);
+            var t = ulong.Parse((string)reader.Value);
             return new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddMilliseconds(t);
         }
     }
