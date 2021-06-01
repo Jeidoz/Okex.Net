@@ -121,7 +121,7 @@ namespace CustomCexWrapper
             string underlyingForOption = null,
             string instrumentId = null)
         {
-            if (type == InstrumentType.OPTION && string.IsNullOrEmpty(underlyingForOption))
+            if (type == InstrumentType.Option && string.IsNullOrEmpty(underlyingForOption))
             {
                 return WebCallResult<IEnumerable<TradeInstrument>>.CreateErrorResult(
                     null,
@@ -131,7 +131,7 @@ namespace CustomCexWrapper
 
             var url = new StringBuilder("api/v5/public/instruments?");
 
-            url.Append($"instType={type.ToString()}");
+            url.Append($"instType={type.ToValidApiValue()}");
             if (!string.IsNullOrEmpty(underlyingForOption)) url.Append($"&uly={underlyingForOption}");
             if (!string.IsNullOrEmpty(instrumentId)) url.Append($"&instId={instrumentId}");
 

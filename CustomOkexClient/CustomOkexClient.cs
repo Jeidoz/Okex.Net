@@ -163,7 +163,7 @@ namespace CustomCexWrapper
 
         public async Task<IDictionary<string, OrderBook>> GetFuturesUsdtOrderBooksAsync()
         {
-            var symbols = await _restClient.PublicData_GetInstruments(InstrumentType.FUTURES);
+            var symbols = await _restClient.PublicData_GetInstruments(InstrumentType.Futures);
             var usdtSymbols = symbols.Data
                 .Where(s => s.SettlementAndMarginCurrency.Equals("USDT", StringComparison.InvariantCultureIgnoreCase))
                 .Select(s => s.Id)

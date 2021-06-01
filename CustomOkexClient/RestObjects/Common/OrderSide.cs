@@ -6,11 +6,11 @@ namespace CustomCexWrapper.RestObjects.Common
 {
     [DataContract]
     [JsonConverter(typeof(StringEnumConverter))]
-    public enum ContractType : byte
+    public enum OrderSide
     {
-        [EnumMember(Value = "linear")]
-        Linear,
-        [EnumMember(Value = "inverse")]
-        Inverse
+        [EnumMember(Value = "buy")]
+        Buy,
+        [EnumMember(Value = "sell")]
+        Sell
     }
 }
